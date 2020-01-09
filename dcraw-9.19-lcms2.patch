@@ -1,0 +1,59 @@
+From 789b763bff1701ef31bd077ae49671dfe1c82a51 Mon Sep 17 00:00:00 2001
+From: Nils Philippsen <nils@redhat.com>
+Date: Wed, 4 Sep 2013 17:13:49 +0200
+Subject: [PATCH] Add support for LCMS version 2.x.
+
+---
+ dcraw.c | 21 ++++++++++++++++++++-
+ 1 file changed, 20 insertions(+), 1 deletion(-)
+
+diff --git a/dcraw.c b/dcraw.c
+index 96e3d1f..4b280b5 100644
+--- a/dcraw.c
++++ b/dcraw.c
+@@ -80,7 +80,13 @@ typedef unsigned long long UINT64;
+ #include <jpeglib.h>		/* Decode compressed Kodak DC120 photos */
+ #endif				/* and Adobe Lossy DNGs */
+ #ifndef NO_LCMS
+-#include <lcms.h>		/* Support color profiles */
++#ifdef USE_LCMS2
++#include <lcms2.h>		/* Support color profiles */
++#else
++#undef USE_LCMS1
++#define USE_LCMS1
++#include <lcms.h>
++#endif
+ #endif
+ #ifdef LOCALEDIR
+ #include <libintl.h>
+@@ -8581,6 +8587,15 @@ notraw:
+ }
+ 
+ #ifndef NO_LCMS
++#ifdef USE_LCMS2
++static void lcms2_error_show_handler (cmsContext ContextID,
++                                      cmsUInt32Number ErrorCode,
++                                      const char *Text)
++{
++  fprintf (stderr, "lcms2: Error #%d; %s\n", ErrorCode, Text);
++}
++#endif
++
+ void CLASS apply_profile (const char *input, const char *output)
+ {
+   char *prof;
+@@ -8589,7 +8604,11 @@ void CLASS apply_profile (const char *input, const char *output)
+   FILE *fp;
+   unsigned size;
+ 
++#ifdef USE_LCMS2
++  cmsSetLogErrorHandler (lcms2_error_show_handler);
++#else
+   cmsErrorAction (LCMS_ERROR_SHOW);
++#endif
+   if (strcmp (input, "embed"))
+     hInProfile = cmsOpenProfileFromFile (input, "r");
+   else if (profile_length) {
+-- 
+1.8.3.1
+
