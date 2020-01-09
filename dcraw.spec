@@ -1,12 +1,13 @@
 Summary: Tool for decoding raw image data from digital cameras
 Name: dcraw
 Version: 9.19
-Release: 3%{?dist}
+Release: 6%{?dist}
 Group: Applications/Multimedia
 License: GPLv2+
 URL: http://cybercom.net/~dcoffin/dcraw
 Source0: http://cybercom.net/~dcoffin/dcraw/archive/dcraw-%{version}.tar.gz
 Patch0: dcraw-9.19-lcms2.patch
+Patch1: dcraw-9.19-CVE-2013-1438.patch
 BuildRequires: gettext
 BuildRequires: libjpeg-devel
 BuildRequires: lcms2-devel
@@ -20,6 +21,7 @@ downloaded from digital cameras.
 %prep
 %setup -q -n dcraw
 %patch0 -p1 -b .lcms2
+%patch1 -p1 -b .CVE-2013-1438
 
 %build
 gcc %optflags \
@@ -71,6 +73,15 @@ rm -rf %buildroot
 %{_mandir}/man1/*
 
 %changelog
+* Fri Jan 24 2014 Daniel Mach <dmach@redhat.com> - 9.19-6
+- Mass rebuild 2014-01-24
+
+* Fri Dec 27 2013 Daniel Mach <dmach@redhat.com> - 9.19-5
+- Mass rebuild 2013-12-27
+
+* Fri Dec 06 2013 Nils Philippsen <nils@redhat.com> - 9.19-4
+- harden against corrupt input files (CVE-2013-1438)
+
 * Fri Sep 13 2013 Nils Philippsen <nils@redhat.com> - 9.19-3
 - build against the currently maintained version of lcms (2.x)
 
